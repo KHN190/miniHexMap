@@ -9,6 +9,8 @@ public class HexGrids : MonoBehaviour
     [Range(1, 300)]
     public int height = 6;
 
+    public bool noText = true;
+
     public HexCell[] cellsPrefab;
     public Text cellLabelPrefab;
     public Canvas gridCanvasPrefab;
@@ -193,7 +195,8 @@ public class HexGrids : MonoBehaviour
         Text label = Instantiate(cellLabelPrefab);
         label.rectTransform.SetParent(canvas.transform, false);
         label.rectTransform.anchoredPosition = Vector2.zero;
-        label.text = cell.coordinates.ToStringOnSeparateLines();
+        if (!noText)
+            label.text = cell.coordinates.ToStringOnSeparateLines();
 
         cell.uiRect = label.rectTransform;
 
