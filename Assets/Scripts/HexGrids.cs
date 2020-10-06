@@ -8,15 +8,22 @@ public class HexGrids : HexGridBase
     public GameObject waterPrefab;
 
     private HexCell touchedCell;
-    private GameObject waters;
-
+    private HexMaterial lastTouchedMaterial;
+    
     private Transform cellsTransform;
     private Transform watersTransform;
+
+    private Transform waters;
 
     private void Awake()
     {
         cellsTransform = transform.GetChild(0).transform;
         watersTransform = transform.GetChild(1).transform;
+    }
+
+    private void Start()
+    {
+        RegenerateCells();
     }
 
     #region Track Mouse
@@ -39,7 +46,7 @@ public class HexGrids : HexGridBase
     {
         if (touchedCell == null)
             return;
-        touchedCell.SetColor(HexMaterial.White);
+        touchedCell.SetColor(lastTouchedMaterial);
         touchedCell = null;
     }
 
@@ -52,6 +59,7 @@ public class HexGrids : HexGridBase
         if (cell != null)
         {
             ResetLastTouch();
+            lastTouchedMaterial = cell.material;
             cell.SetColor(HexMaterial.Magenta);
             touchedCell = cell;
         }
@@ -62,18 +70,26 @@ public class HexGrids : HexGridBase
 
     #region Generate
 
-    [Button]
-    public void RandomGenerate()
+    [Button("Regenerate")]
+    public override void RegenerateCells()
     {
         ClearCells();
 
         cells = new HexCell[height * width];
 
+        // noise for map
+        noises = new float[height * width];
+
+        float rnd = Random.value * 100;
+
         for (int z = 0, i = 0; z < height; z++)
         {
             for (int x = 0; x < width; x++)
             {
-                int elevation = (int) (Random.value * 10) % 6 - 2;
+                // perlin noise
+                noises[i] = Mathf.PerlinNoise((float)x / width * 4 + rnd, (float)z / height * 4);
+
+                int elevation = (int) (noises[i] * 6) % 6 - 2;
 
                 CreateCell(x, z, i, elevation);
                 SetHexCellColor(cells[i]);
@@ -91,7 +107,7 @@ public class HexGrids : HexGridBase
 
         if (waters != null)
         {
-            DestroyImmediate(waters);
+            DestroyImmediate(waters.gameObject);
         }
     }
 
@@ -191,15 +207,15 @@ public class HexGrids : HexGridBase
         water.transform.position = position;
         water.transform.SetParent(watersTransform);
 
-        water.transform.localScale = new Vector3(25 * width, 30, height * 20);
+        water.transform.localScale = new Vector3(width * 18.75f, 30, height * 16f);
 
-        waters = water;
+        waters = water.transform;
     }
 
     private void SetHexCellColor(HexCell cell)
     {
-        float rnd = Random.value;
-        int index = (int) (rnd * 10 % 6);
+        float rnd = noises[cell.gridIndex];
+        int index = (int) ((rnd * 10 + 3) % 6);
 
         cell.SetColor((HexMaterial) index);
     }

@@ -2,7 +2,7 @@
 
 public enum HexMaterial
 {
-    White, Blue, Black, Yellow, Green, Red, Magenta
+    Blue, White, Yellow, Black, Red, Green, Magenta
 }
 
 public static class HexMaterialExtensions

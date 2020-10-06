@@ -9,8 +9,6 @@ public abstract class HexGridBase : MonoBehaviour
     public int width = 6;
     [Range(1, 100)]
     public int height = 6;
-    [Range(1, 4)]
-    public int layers = 1;
 
     public bool noText = true;
 
@@ -20,11 +18,12 @@ public abstract class HexGridBase : MonoBehaviour
     public Canvas gridCanvasPrefab;
 
     protected HexCell[] cells;
+    protected float[] noises;
 
     #region Generate
 
     [Button("Regenerate")]
-    public void RegenerateCells()
+    public virtual void RegenerateCells()
     {
         ClearCells();
         CreateCells();
@@ -41,7 +40,8 @@ public abstract class HexGridBase : MonoBehaviour
             if (c != null)
                 DestroyImmediate(c.gameObject);
         }
-        cells = new HexCell[0];
+        cells = null;
+        noises = null;
     }
 
     [Button]

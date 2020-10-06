@@ -67,9 +67,6 @@ Shader "Custom/Water"
 				o.color = v.color;
 				o.texcoord = v.texcoord;
 				o.uvgrab = ComputeGrabScreenPos(o.vertex);
-				#if UNITY_UV_STARTS_AT_TOP
-					// o.uvgrab.y *= -1;
-				#endif
 				return o;
 			}
 
@@ -84,15 +81,6 @@ Shader "Custom/Water"
 				half4 bump = tex2D(_BumpMap, i.texcoord);
 				half2 distortion = UnpackNormal(bump).rg;
 
-				// float2 waterDisplacement = sinusoid
-				// (
-				// 	float2 (time, time) + (noise.xy) * .1,
-				// 	float2(-_Magnitude, -_Magnitude),
-				// 	float2(+_Magnitude, +_Magnitude),
-				// 	float2(_FlowSpeed, _FlowSpeed)
-				// );
-
-				// i.uvgrab.xy += waterDisplacement + distortion * _Magnitude;
 				i.uvgrab.xy += distortion * _Magnitude;
  				fixed4 col = tex2Dproj( _GrabTexture, UNITY_PROJ_COORD(i.uvgrab));
 
