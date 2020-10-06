@@ -3,7 +3,7 @@ using EasyButtons;
 
 public class HexCell : MonoBehaviour
 {
-    [Range(0, 3)]
+    [Range(-2, 3)]
     public int Elevation;
 
     public HexCoordinates coordinates;
@@ -15,7 +15,6 @@ public class HexCell : MonoBehaviour
     internal RectTransform uiRect;
     internal HexGridBase grid;
     internal int gridIndex;
-    internal int layer;
 
     [Button]
     public void Refresh()

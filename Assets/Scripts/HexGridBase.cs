@@ -21,11 +21,6 @@ public abstract class HexGridBase : MonoBehaviour
 
     protected HexCell[] cells;
 
-    void Awake()
-    {
-        RegenerateCells();
-    }
-
     #region Generate
 
     [Button("Regenerate")]
@@ -36,7 +31,7 @@ public abstract class HexGridBase : MonoBehaviour
     }
 
     [Button("Clear")]
-    public void ClearCells()
+    public virtual void ClearCells()
     {
         if (cells == null)
             return;
@@ -113,6 +108,21 @@ public abstract class HexGridBase : MonoBehaviour
         if (index < 0 || index >= cells.Length)
             return null;
         return cells[index];
+    }
+
+    protected Vector3 Center()
+    {
+        Vector3 center = Vector3.zero;
+        if (cells == null)
+            return center;
+
+        foreach (HexCell cell in cells)
+        {
+            center += cell.transform.position;
+        }
+        center /= width * height;
+
+        return new Vector3(center.x, transform.position.y, center.z);
     }
     #endregion
 

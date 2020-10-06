@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: HexCell_1
-  m_Shader: {fileID: 4800000, guid: 9323b0c8d1d46465dbc1df013144f99e, type: 3}
+  m_Name: Sand
+  m_Shader: {fileID: 4800000, guid: 8ad573a6f6ef942799f5fc4c98991cb0, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -23,10 +23,6 @@ Material:
         m_Texture: {fileID: 2800000, guid: 5f09793490d72400483363a183aa3294, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _Cookie:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -36,10 +32,6 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailNormalMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _DistortTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -64,51 +56,26 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _Alpha: 1
     - _BumpScale: 1
-    - _CookieStrength: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
-    - _DistortCookie: 0
-    - _DistortCookieAmount: 1
-    - _DistortRotationSpeed: 0
-    - _DistortSpeed: 0
     - _DstBlend: 0
-    - _FlowSpeed: 1.7
-    - _FogOrder: 0
+    - _FlowSpeed: 3
     - _GlossMapScale: 1
-    - _Glossiness: 0
+    - _Glossiness: 1
     - _GlossyReflections: 1
-    - _IntersectionThresholdMax: 0.5
-    - _Invert: 0
-    - _Magnitude: 0.15
-    - _MainDistort: 0
-    - _MainDistortAmount: 1
+    - _Magnitude: 1
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
-    - _Offset: 0
-    - _OriginX: 0
-    - _OriginY: 0
     - _Parallax: 0.02
-    - _Period: 1
-    - _Rotation: 0
-    - _RotationSpeed: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
-    - _SpeedX: 0
-    - _SpeedY: 0
     - _SrcBlend: 1
-    - _TestDistortion: 0
-    - _Translate: 0
     - _UVSec: 0
-    - _UseCookie: 0
-    - _UseMainDistort: 0
-    - _WaterFogDensity: 2
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.16958882, g: 0.5647983, b: 0.9716981, a: 1}
-    - _Colour: {r: 0.6556604, g: 0.7895702, b: 1, a: 1}
-    - _Emission: {r: 0.26673195, g: 0.35008976, b: 0.509434, a: 0}
+    - _Color: {r: 0.5660378, g: 0.2841288, b: 0, a: 1}
+    - _Colour: {r: 0.8159487, g: 0.8671001, b: 0.9056604, a: 1}
+    - _Emission: {r: 0.28564438, g: 0.35568854, b: 0.46226418, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _WaterFogColor: {r: 0.16731933, g: 0.754717, b: 0.6067113, a: 1}

@@ -14,7 +14,7 @@
         LOD 200
 
         CGPROGRAM
-        #pragma surface surf Standard //fullforwardshadows
+        #pragma surface surf Standard
         #pragma target 3.0
 
         sampler2D _MainTex;
@@ -36,15 +36,13 @@
             fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
             
             float3 localPos = IN.worldPos -  mul(unity_ObjectToWorld, float4(0,0,0,1)).xyz;
-            //float h = clamp(1 - localPos.y / 5, -2, 1);
-            float h = lerp(-2, 3, 1 - localPos.y / 10);
+            float h = 1 - lerp(-3, 2, 1 - localPos.y / 10);
 
             o.Albedo = clamp(c.rgb * IN.color, _Emission * .2, 1);
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
-            o.Emission = clamp(lerp(_Emission, float4(.7, .7, .7, 1), h), .1, .9);
-            //o.Emission = float4(.5, .5, .5, 1)
+            o.Emission = clamp(lerp(_Emission, float4(.5, .5, .5, 1), h), .1, .9);
         }
         ENDCG
     }
