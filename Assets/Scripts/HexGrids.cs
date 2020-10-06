@@ -2,20 +2,10 @@
 using UnityEngine.UI;
 using EasyButtons;
 
-public class HexGrids : MonoBehaviour
+public class HexGrids : HexGridBase
 {
-    [Range(1, 300)]
-    public int width = 6;
-    [Range(1, 300)]
-    public int height = 6;
-
-    public bool noText = true;
-
-    public HexCell[] cellsPrefab;
     public Text cellLabelPrefab;
-    public Canvas gridCanvasPrefab;
 
-    private HexCell[] cells;
     private HexCell touchedCell;
 
     void Awake()
@@ -60,90 +50,13 @@ public class HexGrids : MonoBehaviour
             touchedCell = cell;
         }
     }
-
-    public HexCell GetCell(HexCoordinates coordinates)
-    {
-        int index = coordinates.X + coordinates.Z * width + coordinates.Z / 2;
-        if (index < 0 || index >= cells.Length)
-            return null;
-        return cells[index];
-    }
     #endregion
 
 
 
     #region Generate
 
-    [Button("Regenerate")]
-    public void RegenerateCells()
-    {
-        ClearCells();
-        CreateCells();
-    }
-
-    [Button("Clear")]
-    public void ClearCells()
-    {
-        if (cells == null)
-            return;
-
-        foreach (HexCell c in cells)
-        {
-            if (c != null)
-                DestroyImmediate(c.gameObject);
-        }
-        cells = new HexCell[0];
-    }
-
-    [Button]
-    public void Refresh()
-    {
-        if (cells == null)
-            return;
-
-        for (int i = 0; i < cells.Length; i++)
-        {
-            RefreshCell(i);
-        }
-    }
-
-    public void Refresh(HexCell cell)
-    {
-        if (cell == null || cells == null)
-            return;
-
-        RefreshCell(cell.gridIndex);
-    }
-
-    private void RefreshCell(int i)
-    {
-        HexCell cell = cells[i];
-
-        if (cell != null)
-        {
-            HexCoordinates coord = cell.coordinates;
-            HexCell newCell = CreateCell(coord.X + coord.Z / 2, coord.Z, i, cell.Elevation);
-            newCell.SetColor(cell.material);
-            newCell.SetElevation(cell.Elevation);
-
-            DestroyImmediate(cell.gameObject);
-        }
-    }
-    
-    private void CreateCells()
-    {
-        cells = new HexCell[height * width];
-
-        for (int z = 0, i = 0; z < height; z++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                CreateCell(x, z, i++);
-            }
-        }
-    }
-
-    private HexCell CreateCell(int x, int z, int i, int elevation = 0)
+    protected override HexCell CreateCell(int x, int z, int i, int elevation = 0)
     {
         Vector3 position;
         position.x = (x + z * 0.5f - z / 2) * (HexMetrics.innerRadius * 2f);
@@ -164,6 +77,16 @@ public class HexGrids : MonoBehaviour
         cell.gridIndex = i;
 
         // set neightbours
+        SetNeighbors(cell, x, z, i);
+
+        // set canvas
+        SetCanvas(cell);
+
+        return cell;
+    }
+
+    private void SetNeighbors(HexCell cell, int x, int z, int i)
+    {
         if (x > 0)
         {
             cell.SetNeighbor(HexDirection.W, cells[i - 1]);
@@ -187,8 +110,10 @@ public class HexGrids : MonoBehaviour
                 }
             }
         }
+    }
 
-        // set canvas
+    private void SetCanvas(HexCell cell)
+    {
         Canvas canvas = Instantiate(gridCanvasPrefab);
         canvas.transform.SetParent(cell.transform, false);
 
@@ -199,13 +124,6 @@ public class HexGrids : MonoBehaviour
             label.text = cell.coordinates.ToStringOnSeparateLines();
 
         cell.uiRect = label.rectTransform;
-
-        return cell;
-    }
-
-    HexCell GetCellPrefab(int elevation)
-    {
-        return cellsPrefab[elevation];
     }
     #endregion
 
@@ -219,7 +137,7 @@ public class HexGrids : MonoBehaviour
         Debug.Log("save file");
     }
 
-    [Button]
+    [Button("Load", ButtonSpacing.After)]
     public void Load()
     {
         Debug.Log("load file");

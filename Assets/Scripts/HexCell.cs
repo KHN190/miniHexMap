@@ -13,8 +13,9 @@ public class HexCell : MonoBehaviour
     HexCell[] neighbors = new HexCell[6];
 
     internal RectTransform uiRect;
-    internal HexGrids grid;
+    internal HexGridBase grid;
     internal int gridIndex;
+    internal int layer;
 
     [Button]
     public void Refresh()
@@ -33,9 +34,12 @@ public class HexCell : MonoBehaviour
     {
         Elevation = elev;
 
-        Vector3 uiPosition = uiRect.localPosition;
-        uiPosition.z = Elevation * -HexMetrics.elevationStep;
-        uiRect.localPosition = uiPosition;
+        if (uiRect)
+        {
+            Vector3 uiPosition = uiRect.localPosition;
+            uiPosition.z = Elevation * -HexMetrics.elevationStep;
+            uiRect.localPosition = uiPosition;
+        }
     }
 
     public HexCell GetNeighbor(HexDirection direction)
