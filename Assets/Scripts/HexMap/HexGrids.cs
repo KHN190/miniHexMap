@@ -236,7 +236,7 @@ public class HexGrids : HexGridBase
                 Debug.LogWarning("Grass prefab not set, cannot instantiate grass.");
                 return;
             }
-            float scale = 100 * rnd % 5 + 10;
+            float scale = 10 * rnd % 3 + 5;
 
             GameObject grass = Instantiate(grassPrefab);
             grass.transform.SetParent(cell.transform, false);

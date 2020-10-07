@@ -13,7 +13,7 @@ public class GrassMeshGen : MeshGenBase
     public float maxHeight = 2f;
     [Range(.1f, .5f)]
     public float grassRadius = .1f;
-    [Range(1, 30)]
+    [Range(1, 100)]
     public int nGrass = 5;
 
     void Initialize()
@@ -62,10 +62,13 @@ public class GrassMeshGen : MeshGenBase
             AddTriangle(v1, v2, v3);
 
             // rotate and move vertices
-            float radius = grassRadius * .5f;
-            float rx = Random.value * radius - radius;
-            float ry = Random.value * radius - radius;
-            Vector3 offset = new Vector3(rx, 0, ry);
+            // uniformly sample in a circle is a math problem!
+            // https://stackoverflow.com/questions/5837572/generate-a-random-point-within-a-circle-uniformly
+
+            float t = 2 * Mathf.PI * grassRadius;
+            float u = Random.value + Random.value;
+            float r = u > 1 ? 2 - u : u;
+            Vector3 offset = new Vector3(r * Mathf.Cos(t), 0, r * Mathf.Sin(t));
 
             Quaternion rotation = Quaternion.Euler(0, 30, 0);
             Matrix4x4 m = Matrix4x4.Rotate(rotation);
