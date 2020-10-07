@@ -161,9 +161,9 @@ MonoBehaviour:
   hexCellPrefab: {fileID: 8367555087575495599, guid: 326ac35f4561d4beb949468908f1cff0,
     type: 3}
   hexCellMaterail: {fileID: 2100000, guid: bd801eb671eea48f0a611272259ddc14, type: 2}
-  generateEdge: 0
-  generateBottom: 0
-  elevation: 0
+  generateEdge: 1
+  generateBottom: 1
+  elevation: 4
 --- !u!23 &675898981
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -210,7 +210,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 675898979}
-  m_Mesh: {fileID: 4300000, guid: ea917069068684bbaaa2a7418d6cb394, type: 2}
+  m_Mesh: {fileID: 4300000, guid: 3659bda6f3203490e844a3c71b1ba986, type: 2}
 --- !u!4 &675898983
 Transform:
   m_ObjectHideFlags: 0
@@ -219,7 +219,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 675898979}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -10.7, z: 0.51}
+  m_LocalPosition: {x: 0, y: 0, z: 15.6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -394,7 +394,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0.6427876, y: 0, z: 0, w: 0.7660445}
-  m_LocalPosition: {x: 449, y: 788, z: 191}
+  m_LocalPosition: {x: 197, y: 402, z: 96}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -542,12 +542,12 @@ PrefabInstance:
     - target: {fileID: 2564495130145747822, guid: 2c913458e5d25491baec932ac8bc0bc7,
         type: 3}
       propertyPath: width
-      value: 50
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 2564495130145747822, guid: 2c913458e5d25491baec932ac8bc0bc7,
         type: 3}
       propertyPath: height
-      value: 50
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 2564495130145747822, guid: 2c913458e5d25491baec932ac8bc0bc7,
         type: 3}
@@ -591,6 +591,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8489749326230006577, guid: 10459be14320b4837afeb9a0df97828a,
         type: 3}
+    - target: {fileID: 2564495130145747822, guid: 2c913458e5d25491baec932ac8bc0bc7,
+        type: 3}
+      propertyPath: noiseScale
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 4138351185908535901, guid: 2c913458e5d25491baec932ac8bc0bc7,
         type: 3}
       propertyPath: m_Name

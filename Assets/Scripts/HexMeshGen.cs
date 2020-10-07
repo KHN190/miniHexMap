@@ -12,7 +12,7 @@ public class HexMeshGen : MonoBehaviour
     public bool generateEdge = true;
     public bool generateBottom = true;
 
-    [Range(0, 3)]
+    [Range(0, 6)]
     public int elevation;
 
     Mesh hexMesh;
@@ -96,6 +96,12 @@ public class HexMeshGen : MonoBehaviour
         for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
         {
             Triangulate(d, cell);
+        }
+        for (int i = 0; i < vertices.Count; i++)
+        {
+            Vector3 elevated = vertices[i];
+            elevated.y += cell.Elevation * HexMetrics.elevationStep;
+            vertices[i] = elevated;
         }
     }
 

@@ -3,7 +3,7 @@ using EasyButtons;
 
 public class HexCell : MonoBehaviour
 {
-    [Range(-2, 3)]
+    [Range(-2, 6)]
     public int Elevation;
 
     public HexCoordinates coordinates;

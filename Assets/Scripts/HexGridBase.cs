@@ -1,4 +1,5 @@
-﻿using EasyButtons;
+﻿using System.Collections.Generic;
+using EasyButtons;
 using UnityEngine;
 
 public abstract class HexGridBase : MonoBehaviour
@@ -13,24 +14,25 @@ public abstract class HexGridBase : MonoBehaviour
     public bool noText = true;
 
     [Header("Prefabs")]
-
-    public HexCell[] cellsPrefab;
     public Canvas gridCanvasPrefab;
 
     protected HexCell[] cells;
     protected float[] noises;
+    protected Vector3 center;
+
+    protected readonly Dictionary<int, HexCell> cellPrefabCache = new Dictionary<int, HexCell>();
 
     #region Generate
 
     [Button("Regenerate")]
     public virtual void RegenerateCells()
     {
-        ClearCells();
+        Clear();
         CreateCells();
     }
 
     [Button("Clear")]
-    public virtual void ClearCells()
+    public virtual void Clear()
     {
         if (cells == null)
             return;
@@ -42,6 +44,8 @@ public abstract class HexGridBase : MonoBehaviour
         }
         cells = null;
         noises = null;
+        center = Vector3.zero;
+        cellPrefabCache.Clear();
     }
 
     [Button]
@@ -99,7 +103,12 @@ public abstract class HexGridBase : MonoBehaviour
 
     protected HexCell GetCellPrefab(int elevation)
     {
-        return cellsPrefab[elevation];
+        if (!cellPrefabCache.ContainsKey(elevation))
+        {
+            HexCell prefab = Resources.Load<HexCell>("Prefabs/HexCell_" + elevation);
+            cellPrefabCache[elevation] = prefab;
+        }
+        return cellPrefabCache[elevation];
     }
 
     public HexCell GetCell(HexCoordinates coordinates)
@@ -112,7 +121,10 @@ public abstract class HexGridBase : MonoBehaviour
 
     protected Vector3 Center()
     {
-        Vector3 center = Vector3.zero;
+        if (center != Vector3.zero)
+            return center;
+
+        center = Vector3.zero;
         if (cells == null)
             return center;
 

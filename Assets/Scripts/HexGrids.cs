@@ -7,6 +7,10 @@ public class HexGrids : HexGridBase
     public Text cellLabelPrefab;
     public GameObject waterPrefab;
 
+    [Header("Perlin Noise")]
+    [Range(.1f, 5f)]
+    public float noiseScale = 4f;
+
     private HexCell touchedCell;
     private HexMaterial lastTouchedMaterial;
     
@@ -73,23 +77,23 @@ public class HexGrids : HexGridBase
     [Button("Regenerate")]
     public override void RegenerateCells()
     {
-        ClearCells();
+        Clear();
 
         cells = new HexCell[height * width];
 
         // noise for map
         noises = new float[height * width];
 
-        float rnd = Random.value * 100;
+        float rnd = Random.value * 1000;
 
         for (int z = 0, i = 0; z < height; z++)
         {
             for (int x = 0; x < width; x++)
             {
                 // perlin noise
-                noises[i] = Mathf.PerlinNoise((float)x / width * 4 + rnd, (float)z / height * 4);
+                noises[i] = Mathf.PerlinNoise((float)x / width * noiseScale + rnd, (float)z / height * noiseScale);
 
-                int elevation = (int) (noises[i] * 6) % 6 - 2;
+                int elevation = (int) (noises[i] * 9) % 9 - 2;
 
                 CreateCell(x, z, i, elevation);
                 SetHexCellColor(cells[i]);
@@ -101,9 +105,9 @@ public class HexGrids : HexGridBase
     }
 
     [Button("Clear")]
-    public override void ClearCells()
+    public override void Clear()
     {
-        base.ClearCells();
+        base.Clear();
 
         if (waters != null)
         {
@@ -124,7 +128,10 @@ public class HexGrids : HexGridBase
         position.z = z * 15f;
 
         // position cells
-        HexCell cell = cells[i] = Instantiate(GetCellPrefab(Mathf.Abs(elevation)));
+        int prefabIndex = elevation <= 0 ? 1 : elevation;
+        //Debug.Log("Load prefab: " + prefabIndex);
+
+        HexCell cell = cells[i] = Instantiate(GetCellPrefab(prefabIndex));
         cell.transform.SetParent(cellsTransform, false);
         cell.transform.localPosition = position;
         cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
@@ -201,13 +208,13 @@ public class HexGrids : HexGridBase
         }
 
         Vector3 position = Center();
-        position.y = transform.position.y + 0.1f - 15f;
+        position.y = transform.position.y + 0.1f - 12.5f;
 
         GameObject water = Instantiate(waterPrefab);
         water.transform.position = position;
         water.transform.SetParent(watersTransform);
 
-        water.transform.localScale = new Vector3(width * 18.75f, 30, height * 16f);
+        water.transform.localScale = new Vector3(width * 18.75f, 25, height * 16f);
 
         waters = water.transform;
     }
@@ -215,7 +222,7 @@ public class HexGrids : HexGridBase
     private void SetHexCellColor(HexCell cell)
     {
         float rnd = noises[cell.gridIndex];
-        int index = (int) ((rnd * 10 + 3) % 6);
+        int index = (int) (rnd * 10 % 10);
 
         cell.SetColor((HexMaterial) index);
     }
