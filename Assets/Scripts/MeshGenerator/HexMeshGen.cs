@@ -1,13 +1,10 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 using EasyButtons;
-using UnityEditor;
 
-[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-public class HexMeshGen : MonoBehaviour
+public class HexMeshGen : MeshGenBase
 {
+    // need a prefab because we need the script, which has settings
     public HexCell hexCellPrefab;
-    public Material hexCellMaterail;
 
     public bool generateEdge = true;
     public bool generateBottom = true;
@@ -15,14 +12,10 @@ public class HexMeshGen : MonoBehaviour
     [Range(0, 6)]
     public int elevation;
 
-    Mesh hexMesh;
-    readonly List<Vector3> vertices = new List<Vector3>();
-    readonly List<int> triangles = new List<int>();
-
     void Initialize()
     {
-        GetComponent<MeshFilter>().mesh = hexMesh = new Mesh();
-        hexMesh.name = "HexCell";
+        GetComponent<MeshFilter>().mesh = mesh = new Mesh();
+        mesh.name = "HexCell";
     }
 
     [Button]
@@ -43,52 +36,42 @@ public class HexMeshGen : MonoBehaviour
     }
 
     [Button]
-    public void SaveAsset()
+    public override void SaveAsset()
     {
-        if (hexMesh == null)
-        {
-            Debug.Log("Not generated, cannot save.");
-            return;
-        }
-        string path = EditorUtility.SaveFilePanel("Save Separate Mesh Asset", "Assets/", name, "asset");
-        path = FileUtil.GetProjectRelativePath(path);
-        Debug.Log("Saving mesh to: " + path);
-
-        AssetDatabase.CreateAsset(hexMesh, path);
-        AssetDatabase.SaveAssets();
+        base.SaveAsset();
     }
 
     public void Triangulate(HexCell[] cells)
     {
         Initialize();
 
-        hexMesh.Clear();
+        mesh.Clear();
         vertices.Clear();
         triangles.Clear();
         for (int i = 0; i < cells.Length; i++)
         {
             Triangulate(cells[i]);
         }
-        hexMesh.vertices = vertices.ToArray();
-        hexMesh.triangles = triangles.ToArray();
-        hexMesh.RecalculateNormals();
+        mesh.vertices = vertices.ToArray();
+        mesh.triangles = triangles.ToArray();
+        mesh.RecalculateNormals();
     }
 
     public void RefreshSingleCell(HexCell cell)
     {
         Initialize();
 
-        hexMesh.Clear();
+        mesh.Clear();
         vertices.Clear();
         triangles.Clear();
 
         Triangulate(cell);
 
-        hexMesh.vertices = vertices.ToArray();
-        hexMesh.triangles = triangles.ToArray();
-        hexMesh.RecalculateNormals();
+        mesh.vertices = vertices.ToArray();
+        mesh.triangles = triangles.ToArray();
+        mesh.RecalculateNormals();
 
-        cell.GetComponent<MeshFilter>().mesh = hexMesh;
+        cell.GetComponent<MeshFilter>().mesh = mesh;
     }
 
     void Triangulate(HexCell cell)
@@ -195,31 +178,5 @@ public class HexMeshGen : MonoBehaviour
         Vector3 v2 = center + HexMetrics.corners[(int)direction + 1];
 
         AddTriangle(center, v2, v1);
-    }
-
-    void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3)
-    {
-        int vertexIndex = vertices.Count;
-        vertices.Add(v1);
-        vertices.Add(v2);
-        vertices.Add(v3);
-        triangles.Add(vertexIndex);
-        triangles.Add(vertexIndex + 1);
-        triangles.Add(vertexIndex + 2);
-    }
-
-    void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
-    {
-        int vertexIndex = vertices.Count;
-        vertices.Add(v1);
-        vertices.Add(v2);
-        vertices.Add(v3);
-        vertices.Add(v4);
-        triangles.Add(vertexIndex);
-        triangles.Add(vertexIndex + 2);
-        triangles.Add(vertexIndex + 1);
-        triangles.Add(vertexIndex + 1);
-        triangles.Add(vertexIndex + 2);
-        triangles.Add(vertexIndex + 3);
     }
 }

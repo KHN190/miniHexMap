@@ -111,6 +111,12 @@ public abstract class HexGridBase : MonoBehaviour
         return cellPrefabCache[elevation];
     }
 
+    protected GameObject GetGrassPrefab()
+    {
+        int index = Random.value < .5f ? 0 : 1;
+        return Resources.Load<GameObject>("Prefabs/Grass_" + index);
+    }
+
     public HexCell GetCell(HexCoordinates coordinates)
     {
         int index = coordinates.X + coordinates.Z * width + coordinates.Z / 2;

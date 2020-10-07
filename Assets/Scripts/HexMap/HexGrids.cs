@@ -92,11 +92,11 @@ public class HexGrids : HexGridBase
             {
                 // perlin noise
                 noises[i] = Mathf.PerlinNoise((float)x / width * noiseScale + rnd, (float)z / height * noiseScale);
-
                 int elevation = (int) (noises[i] * 9) % 9 - 2;
 
                 CreateCell(x, z, i, elevation);
                 SetHexCellColor(cells[i]);
+                SetGrass(cells[i]);
 
                 i++;
             }
@@ -142,6 +142,9 @@ public class HexGrids : HexGridBase
         // set grid
         cell.grid = this;
         cell.gridIndex = i;
+
+        // set elevation;
+        cell.Elevation = elevation;
 
         // set neightbours
         SetNeighbors(cell, x, z, i);
@@ -217,6 +220,32 @@ public class HexGrids : HexGridBase
         water.transform.localScale = new Vector3(width * 18.75f, 25, height * 16f);
 
         waters = water.transform;
+    }
+
+    private void SetGrass(HexCell cell)
+    {
+        if (cell.material == HexMaterial.Green || cell.material == HexMaterial.Emerald)
+        {
+            float rnd = Random.value;
+            if (rnd < 0.3f)
+                return;
+
+            GameObject grassPrefab = GetGrassPrefab();
+            if (grassPrefab == null)
+            {
+                Debug.LogWarning("Grass prefab not set, cannot instantiate grass.");
+                return;
+            }
+            float scale = 100 * rnd % 5 + 10;
+
+            GameObject grass = Instantiate(grassPrefab);
+            grass.transform.SetParent(cell.transform, false);
+            grass.transform.localScale = new Vector3(scale, scale, scale);
+
+            Vector3 position = cell.transform.position;
+            position.y = cell.Elevation * HexMetrics.elevationStep;
+            grass.transform.position = position;
+        }
     }
 
     private void SetHexCellColor(HexCell cell)
