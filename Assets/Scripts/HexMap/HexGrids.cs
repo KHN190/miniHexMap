@@ -84,19 +84,16 @@ public class HexGrids : HexGridBase
     {
         Clear();
 
+        if (pool == null)
+            pool = new RandomNumberPool();
+
         cells = new HexCell[height * width];
-
-        // noise for map
-        noises = new float[height * width];
-
-        float rnd = Random.value * 1000;
+        noises = RandomNumberPool.Perlin(width, height, noiseScale, pool.Next() * 1000);
 
         for (int z = 0, i = 0; z < height; z++)
         {
             for (int x = 0; x < width; x++)
-            {
-                // perlin noise
-                noises[i] = Mathf.PerlinNoise((float)x / width * noiseScale + rnd, (float)z / height * noiseScale);
+            {   
                 int elevation = (int) (noises[i] * 9) % 9 - 2;
 
                 CreateCell(x, z, i, elevation);
@@ -234,7 +231,7 @@ public class HexGrids : HexGridBase
 
         if (cell.material == HexMaterial.Green || cell.material == HexMaterial.Emerald)
         {
-            float rnd = Random.value;
+            float rnd = pool.Next();
             if (rnd < 1 - grassDensity)
                 return;
 

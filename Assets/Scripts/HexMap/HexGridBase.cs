@@ -20,6 +20,7 @@ public abstract class HexGridBase : MonoBehaviour
     protected float[] noises;
     protected Vector3 center;
 
+    protected RandomNumberPool pool;
     protected readonly Dictionary<int, HexCell> cellPrefabCache = new Dictionary<int, HexCell>();
 
     #region Generate
@@ -27,6 +28,9 @@ public abstract class HexGridBase : MonoBehaviour
     [Button("Regenerate")]
     public virtual void RegenerateCells()
     {
+        if (pool == null)
+            pool = new RandomNumberPool();
+        
         Clear();
         CreateCells();
     }
@@ -113,7 +117,7 @@ public abstract class HexGridBase : MonoBehaviour
 
     protected GameObject GetGrassPrefab()
     {
-        int index = Random.value < .5f ? 0 : 1;
+        int index = pool.Next() < .5f ? 0 : 1;
         return Resources.Load<GameObject>("Prefabs/Grass_" + index);
     }
 
