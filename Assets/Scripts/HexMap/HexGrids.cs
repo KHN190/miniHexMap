@@ -7,6 +7,11 @@ public class HexGrids : HexGridBase
     public Text cellLabelPrefab;
     public GameObject waterPrefab;
 
+    [Header("Proc Gen")]
+    public bool generateGrass = true;
+    [Range(0, 1)]
+    public float grassDensity = .7f;
+
     [Header("Perlin Noise")]
     [Range(.1f, 5f)]
     public float noiseScale = 4f;
@@ -224,10 +229,13 @@ public class HexGrids : HexGridBase
 
     private void SetGrass(HexCell cell)
     {
+        if (!generateGrass)
+            return;
+
         if (cell.material == HexMaterial.Green || cell.material == HexMaterial.Emerald)
         {
             float rnd = Random.value;
-            if (rnd < 0.3f)
+            if (rnd < 1 - grassDensity)
                 return;
 
             GameObject grassPrefab = GetGrassPrefab();
