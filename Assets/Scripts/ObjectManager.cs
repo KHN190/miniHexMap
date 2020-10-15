@@ -6,9 +6,9 @@ public class ObjectManager : MonoBehaviour
     [Button("Clear")]
     public void ClearChildren()
     {
-        for (int i = 0; i < transform.childCount; i++)
+        while (transform.childCount != 0)
         {
-            DestroyImmediate(transform.GetChild(i));
+            DestroyImmediate(transform.GetChild(0).gameObject);
         }
     }
 }
