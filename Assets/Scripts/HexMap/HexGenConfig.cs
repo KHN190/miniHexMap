@@ -16,9 +16,7 @@ public class HexGenConfig : MonoBehaviour
     public NoiseType noiseType = NoiseType.Perlin;
 
     [Range(.1f, 5f)]
-    public float perlinScale = 4f;
-    [Range(.1f, 5f)]
-    public float simplexScale = 4f;
+    public float noiseScale = 4f;
     [Range(1, 5)]
     public int noiseLayers = 3;
 }

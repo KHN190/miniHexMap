@@ -160,8 +160,8 @@ public class HexGrids : HexGridBase
 
         for (int layer = 1; layer <= config.noiseLayers; layer++)
         {
-            float scale = config.perlinScale / layer / layer;
-            float weight = layerWeight * Mathf.Pow(.2f, layer - 1);
+            float scale = config.noiseScale * layer * layer;
+            float weight = layerWeight * Mathf.Pow(.25f, layer - 1);
 
             float[] layered;
             float seed = pool.Next() * 1000;

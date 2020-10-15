@@ -6,11 +6,7 @@ Create, edit, generate hex mesh in Editor mode. Export assets to use anywhere.
 
 ## Procgen
 
-Support noises:
-
-* Perlin
-* Simplex
-* Cellular
+Support noises: Perlin / Simplex / Cellular.
 
 ## Related
 
