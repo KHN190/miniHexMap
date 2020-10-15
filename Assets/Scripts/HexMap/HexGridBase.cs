@@ -20,7 +20,7 @@ public abstract class HexGridBase : MonoBehaviour
     protected float[] noises;
     protected Vector3 center;
 
-    protected RandomNumberPool pool;
+    protected NoisePool pool;
     protected readonly Dictionary<int, HexCell> cellPrefabCache = new Dictionary<int, HexCell>();
 
     #region Generate
@@ -29,7 +29,7 @@ public abstract class HexGridBase : MonoBehaviour
     public virtual void RegenerateCells()
     {
         if (pool == null)
-            pool = new RandomNumberPool();
+            pool = new NoisePool();
         
         Clear();
         CreateCells();

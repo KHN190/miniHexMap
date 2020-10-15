@@ -4,6 +4,14 @@ Create, edit, generate hex mesh in Editor mode. Export assets to use anywhere.
 
 ![](./Images/screencast.png)
 
+## Procgen
+
+Support noises:
+
+* Perlin
+* Simplex
+* Cellular
+
 ## Related
 
 * [miniStrategy](https://github.com/KHN190/miniStrategy).
@@ -13,7 +21,6 @@ Create, edit, generate hex mesh in Editor mode. Export assets to use anywhere.
 Algorithms support.
 
 * Pathfinding (in miniStrategy).
-* Procgen.
 
 ### Reference
 

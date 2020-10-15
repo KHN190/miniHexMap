@@ -2,26 +2,18 @@
 using UnityEngine.UI;
 using EasyButtons;
 
+[RequireComponent(typeof(HexGenConfig))]
 public class HexGrids : HexGridBase
 {
     public Text cellLabelPrefab;
     public GameObject waterPrefab;
 
-    [Header("Proc Gen")]
-    public bool generateGrass = true;
-    [Range(0, 1)]
-    public float grassDensity = .7f;
-
-    [Header("Perlin Noise")]
-    [Range(.1f, 5f)]
-    public float noiseScale = 4f;
-
+    private HexGenConfig config;
     private HexCell touchedCell;
     private HexMaterial lastTouchedMaterial;
-    
+
     private Transform cellsTransform;
     private Transform watersTransform;
-
     private Transform waters;
 
     private void Awake()
@@ -82,19 +74,22 @@ public class HexGrids : HexGridBase
     [Button("Regenerate")]
     public override void RegenerateCells()
     {
+        config = GetComponent<HexGenConfig>();
+
         Clear();
 
         if (pool == null)
-            pool = new RandomNumberPool();
+            pool = new NoisePool();
 
         cells = new HexCell[height * width];
-        noises = RandomNumberPool.Perlin(width, height, noiseScale, pool.Next() * 1000);
+
+        InitializeNoise();
 
         for (int z = 0, i = 0; z < height; z++)
         {
             for (int x = 0; x < width; x++)
-            {   
-                int elevation = (int) (noises[i] * 9) % 9 - 2;
+            {
+                int elevation = (int)(noises[i] * 9) % 9 - 2;
 
                 CreateCell(x, z, i, elevation);
                 SetHexCellColor(cells[i]);
@@ -155,6 +150,43 @@ public class HexGrids : HexGridBase
         SetCanvas(cell);
 
         return cell;
+    }
+
+    protected void InitializeNoise()
+    {
+        noises = new float[width * height];
+
+        float layerWeight = NoisePool.NoiseLayerInitialWeight(config.noiseLayers);
+
+        for (int layer = 1; layer <= config.noiseLayers; layer++)
+        {
+            float scale = config.perlinScale / layer / layer;
+            float weight = layerWeight * Mathf.Pow(.2f, layer - 1);
+
+            float[] layered;
+            float seed = pool.Next() * 1000;
+
+            switch (config.noiseType)
+            {
+                case NoiseType.Perlin:
+                    layered = NoisePool.Perlin(width, height, scale, seed);
+                    break;
+                case NoiseType.Simplex:
+                    layered = NoisePool.Simplex(width, height, scale, seed);
+                    break;
+                case NoiseType.Cellular:
+                    layered = NoisePool.Cellular(width, height, scale, seed);
+                    break;
+                default:
+                    layered = NoisePool.Perlin(width, height, scale, seed);
+                    break;
+            }
+
+            for (int i = 0; i < noises.Length; i++)
+            {
+                noises[i] += layered[i] * weight;
+            }
+        }
     }
 
     private void SetNeighbors(HexCell cell, int x, int z, int i)
@@ -226,13 +258,13 @@ public class HexGrids : HexGridBase
 
     private void SetGrass(HexCell cell)
     {
-        if (!generateGrass)
+        if (!config.generateGrass)
             return;
 
         if (cell.material == HexMaterial.Green || cell.material == HexMaterial.Emerald)
         {
             float rnd = pool.Next();
-            if (rnd < 1 - grassDensity)
+            if (rnd < 1 - config.grassDensity)
                 return;
 
             GameObject grassPrefab = GetGrassPrefab();
@@ -256,9 +288,10 @@ public class HexGrids : HexGridBase
     private void SetHexCellColor(HexCell cell)
     {
         float rnd = noises[cell.gridIndex];
-        int index = (int) (rnd * 10 % 10);
+        int index = Mathf.Clamp((int)(rnd * 10 % 10), 0, 10);
 
-        cell.SetColor((HexMaterial) index);
+        //Debug.Log("material index: " + index);
+        cell.SetColor((HexMaterial)index);
     }
     #endregion
 
