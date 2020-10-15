@@ -4,12 +4,15 @@ Create, edit, generate hex mesh in Editor mode. Export assets to use anywhere.
 
 ![](./Images/screencast.png)
 
-### Todo
+## Related
+
+* [miniStrategy](https://github.com/KHN190/miniStrategy).
+
+### Plans
 
 Algorithms support.
 
-* Pathfinding.
-* Multilayers.
+* Pathfinding (in miniStrategy).
 * Procgen.
 
 ### Reference
