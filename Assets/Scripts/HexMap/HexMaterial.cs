@@ -1,19 +1,22 @@
 ﻿using UnityEngine;
 
-public enum HexMaterial
+namespace MiniHexMap
 {
-    White, Blue, LightBlue, Yellow, Brown, Black, Emerald, Green, Red, DarkRed, Magenta
-}
-
-public static class HexMaterialExtensions
-{
-    public static Material GetMaterial(this HexMaterial hexMat)
+    public enum HexMaterial
     {
-        return LoadMaterial((int)hexMat);
+        White, Blue, LightBlue, Yellow, Brown, Black, Emerald, Green, Red, DarkRed, Magenta
     }
 
-    static Material LoadMaterial(int index)
+    public static class HexMaterialExtensions
     {
-        return Resources.Load<Material>("Materials/HexCell_" + index);
+        public static Material GetMaterial(this HexMaterial hexMat)
+        {
+            return LoadMaterial((int)hexMat);
+        }
+
+        static Material LoadMaterial(int index)
+        {
+            return Resources.Load<Material>("Materials/HexCell_" + index);
+        }
     }
 }

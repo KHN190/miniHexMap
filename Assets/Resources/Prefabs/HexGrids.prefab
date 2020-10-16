@@ -1,5 +1,48 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2115322176
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2115322177}
+  - component: {fileID: 2115322178}
+  m_Layer: 0
+  m_Name: Waters
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2115322177
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2115322176}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 8683199903086754391}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2115322178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2115322176}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cac9269224a0047b68fa9c8e012362b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4084071401404146758
 GameObject:
   m_ObjectHideFlags: 0
@@ -9,6 +52,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 829033539179503701}
+  - component: {fileID: 4068304158876199102}
   m_Layer: 0
   m_Name: Cells
   m_TagString: Untagged
@@ -30,6 +74,18 @@ Transform:
   m_Father: {fileID: 8683199903086754391}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4068304158876199102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4084071401404146758}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cac9269224a0047b68fa9c8e012362b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4138351185908535901
 GameObject:
   m_ObjectHideFlags: 0
@@ -40,6 +96,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8683199903086754391}
   - component: {fileID: 2564495130145747822}
+  - component: {fileID: 4068304158876199105}
   m_Layer: 0
   m_Name: HexGrids
   m_TagString: Untagged
@@ -59,6 +116,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 829033539179503701}
+  - {fileID: 2115322177}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -74,13 +132,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a2164b86fdb84272ab436d199a186d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 6
-  height: 6
-  layers: 1
+  width: 40
+  height: 40
   noText: 1
-  cellsPrefab: []
   gridCanvasPrefab: {fileID: 7300590446008299709, guid: ac5450773e1ff43ef84de1c8a4ccdf1a,
     type: 3}
   cellLabelPrefab: {fileID: 8626615762894930945, guid: 3a011e4513d2646b28e321d8eeb5a2a9,
     type: 3}
-  waterPrefab: {fileID: 0}
+  waterPrefab: {fileID: 8489749326230006577, guid: ff2c06a787ffa4f0485dc5b7f3c5aedc,
+    type: 3}
+--- !u!114 &4068304158876199105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4138351185908535901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 511e7e6430eb841cb82af3627eba5001, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  generateGrass: 1
+  grassDensity: 0.5
+  noiseType: 1
+  noiseScale: 4
+  noiseLayers: 4

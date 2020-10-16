@@ -2,313 +2,316 @@
 using UnityEngine.UI;
 using EasyButtons;
 
-[RequireComponent(typeof(HexGenConfig))]
-public class HexGrids : HexGridBase
+namespace MiniHexMap
 {
-    public Text cellLabelPrefab;
-    public GameObject waterPrefab;
-
-    private HexGenConfig config;
-    private HexCell touchedCell;
-    private HexMaterial lastTouchedMaterial;
-
-    private Transform cellsTransform;
-    private Transform watersTransform;
-    private Transform waters;
-
-    private void Awake()
+    [RequireComponent(typeof(HexGenConfig))]
+    public class HexGrids : HexGridBase
     {
-        cellsTransform = transform.GetChild(0).transform;
-        watersTransform = transform.GetChild(1).transform;
-    }
+        public Text cellLabelPrefab;
+        public GameObject waterPrefab;
 
-    private void Start()
-    {
-        RegenerateCells();
-    }
+        private HexGenConfig config;
+        private HexCell touchedCell;
+        private HexMaterial lastTouchedMaterial;
 
-    #region Track Mouse
+        private Transform cellsTransform;
+        private Transform watersTransform;
+        private Transform waters;
 
-    void Update()
-    {
-        HandleInput();
-    }
-
-    void HandleInput()
-    {
-        Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(inputRay, out RaycastHit hit))
-        {
-            TouchCell(hit.point);
-        }
-    }
-
-    void ResetLastTouch()
-    {
-        if (touchedCell == null)
-            return;
-        touchedCell.SetColor(lastTouchedMaterial);
-        touchedCell = null;
-    }
-
-    void TouchCell(Vector3 position)
-    {
-        position = transform.InverseTransformPoint(position);
-        HexCoordinates coordinates = HexCoordinates.FromPosition(position);
-
-        HexCell cell = GetCell(coordinates);
-        if (cell != null)
-        {
-            ResetLastTouch();
-            lastTouchedMaterial = cell.material;
-            cell.SetColor(HexMaterial.Magenta);
-            touchedCell = cell;
-        }
-    }
-    #endregion
-
-
-
-    #region Generate
-
-    [Button("Regenerate")]
-    public override void RegenerateCells()
-    {
-        config = GetComponent<HexGenConfig>();
-
-        Clear();
-
-        if (pool == null)
-            pool = new NoisePool();
-
-        cells = new HexCell[height * width];
-
-        InitializeNoise();
-
-        for (int z = 0, i = 0; z < height; z++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                int elevation = (int)(noises[i] * 9) % 9 - 2;
-
-                CreateCell(x, z, i, elevation);
-                SetHexCellColor(cells[i]);
-                SetGrass(cells[i]);
-
-                i++;
-            }
-        }
-        SetWaterSurface();
-    }
-
-    [Button("Clear")]
-    public override void Clear()
-    {
-        base.Clear();
-
-        if (waters != null)
-        {
-            DestroyImmediate(waters.gameObject);
-        }
-    }
-
-    protected override HexCell CreateCell(int x, int z, int i, int elevation = 0)
-    {
-        if (cellsTransform == null)
+        private void Awake()
         {
             cellsTransform = transform.GetChild(0).transform;
-        }
-
-        Vector3 position;
-        position.x = (x + z * 0.5f - z / 2) * (HexMetrics.innerRadius * 2f);
-        position.y = elevation < 0 ? elevation * HexMetrics.elevationStep : 0;
-        position.z = z * 15f;
-
-        // position cells
-        int prefabIndex = elevation <= 0 ? 1 : elevation;
-        //Debug.Log("Load prefab: " + prefabIndex);
-
-        HexCell cell = cells[i] = Instantiate(GetCellPrefab(prefabIndex));
-        cell.transform.SetParent(cellsTransform, false);
-        cell.transform.localPosition = position;
-        cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
-
-        // set material
-        cell.SetColor(HexMaterial.White);
-
-        // set grid
-        cell.grid = this;
-        cell.gridIndex = i;
-
-        // set elevation;
-        cell.Elevation = elevation;
-
-        // set neightbours
-        SetNeighbors(cell, x, z, i);
-
-        // set canvas
-        SetCanvas(cell);
-
-        return cell;
-    }
-
-    protected void InitializeNoise()
-    {
-        noises = new float[width * height];
-
-        float layerWeight = NoisePool.NoiseLayerInitialWeight(config.noiseLayers);
-
-        for (int layer = 1; layer <= config.noiseLayers; layer++)
-        {
-            float scale = config.noiseScale * layer * layer;
-            float weight = layerWeight * Mathf.Pow(.25f, layer - 1);
-
-            float[] layered;
-            float seed = pool.Next() * 1000;
-
-            switch (config.noiseType)
-            {
-                case NoiseType.Perlin:
-                    layered = NoisePool.Perlin(width, height, scale, seed);
-                    break;
-                case NoiseType.Simplex:
-                    layered = NoisePool.Simplex(width, height, scale, seed);
-                    break;
-                case NoiseType.Cellular:
-                    layered = NoisePool.Cellular(width, height, scale, seed);
-                    break;
-                default:
-                    layered = NoisePool.Perlin(width, height, scale, seed);
-                    break;
-            }
-
-            for (int i = 0; i < noises.Length; i++)
-            {
-                noises[i] += layered[i] * weight;
-            }
-        }
-    }
-
-    private void SetNeighbors(HexCell cell, int x, int z, int i)
-    {
-        if (x > 0)
-        {
-            cell.SetNeighbor(HexDirection.W, cells[i - 1]);
-        }
-        if (z > 0)
-        {
-            if ((z & 1) == 0)
-            {
-                cell.SetNeighbor(HexDirection.SE, cells[i - width]);
-                if (x > 0)
-                {
-                    cell.SetNeighbor(HexDirection.SW, cells[i - width - 1]);
-                }
-            }
-            else
-            {
-                cell.SetNeighbor(HexDirection.SW, cells[i - width]);
-                if (x < width - 1)
-                {
-                    cell.SetNeighbor(HexDirection.SE, cells[i - width + 1]);
-                }
-            }
-        }
-    }
-
-    private void SetCanvas(HexCell cell)
-    {
-        if (noText)
-            return;
-
-        Canvas canvas = Instantiate(gridCanvasPrefab);
-        canvas.transform.SetParent(cell.transform, false);
-
-        Text label = Instantiate(cellLabelPrefab);
-        label.rectTransform.SetParent(canvas.transform, false);
-        label.rectTransform.anchoredPosition = Vector2.zero;
-        label.text = cell.coordinates.ToStringOnSeparateLines();
-
-        cell.uiRect = label.rectTransform;
-    }
-
-    private void SetWaterSurface()
-    {
-        if (waterPrefab == null)
-        {
-            Debug.LogWarning("Water prefab not set, cannot instantiate water surface.");
-            return;
-        }
-        if (watersTransform == null)
-        {
             watersTransform = transform.GetChild(1).transform;
         }
 
-        Vector3 position = Center();
-        position.y = transform.position.y + 0.1f - 12.5f;
-
-        GameObject water = Instantiate(waterPrefab);
-        water.transform.position = position;
-        water.transform.SetParent(watersTransform);
-
-        water.transform.localScale = new Vector3(width * 18.75f, 25, height * 16f);
-
-        waters = water.transform;
-    }
-
-    private void SetGrass(HexCell cell)
-    {
-        if (!config.generateGrass)
-            return;
-
-        if (cell.material == HexMaterial.Green || cell.material == HexMaterial.Emerald)
+        private void Start()
         {
-            float rnd = pool.Next();
-            if (rnd < 1 - config.grassDensity)
+            RegenerateCells();
+        }
+
+        #region Track Mouse
+
+        void Update()
+        {
+            HandleInput();
+        }
+
+        void HandleInput()
+        {
+            Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(inputRay, out RaycastHit hit))
+            {
+                TouchCell(hit.point);
+            }
+        }
+
+        void ResetLastTouch()
+        {
+            if (touchedCell == null)
+                return;
+            touchedCell.SetColor(lastTouchedMaterial);
+            touchedCell = null;
+        }
+
+        void TouchCell(Vector3 position)
+        {
+            position = transform.InverseTransformPoint(position);
+            HexCoordinates coordinates = HexCoordinates.FromPosition(position);
+
+            HexCell cell = GetCell(coordinates);
+            if (cell != null)
+            {
+                ResetLastTouch();
+                lastTouchedMaterial = cell.material;
+                cell.SetColor(HexMaterial.Magenta);
+                touchedCell = cell;
+            }
+        }
+        #endregion
+
+
+
+        #region Generate
+
+        [Button("Regenerate")]
+        public override void RegenerateCells()
+        {
+            config = GetComponent<HexGenConfig>();
+
+            Clear();
+
+            if (pool == null)
+                pool = new NoisePool();
+
+            cells = new HexCell[height * width];
+
+            InitializeNoise();
+
+            for (int z = 0, i = 0; z < height; z++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int elevation = (int)(noises[i] * 9) % 9 - 2;
+
+                    CreateCell(x, z, i, elevation);
+                    SetHexCellColor(cells[i]);
+                    SetGrass(cells[i]);
+
+                    i++;
+                }
+            }
+            SetWaterSurface();
+        }
+
+        [Button("Clear")]
+        public override void Clear()
+        {
+            base.Clear();
+
+            if (waters != null)
+            {
+                DestroyImmediate(waters.gameObject);
+            }
+        }
+
+        protected override HexCell CreateCell(int x, int z, int i, int elevation = 0)
+        {
+            if (cellsTransform == null)
+            {
+                cellsTransform = transform.GetChild(0).transform;
+            }
+
+            Vector3 position;
+            position.x = (x + z * 0.5f - z / 2) * (HexMetrics.innerRadius * 2f);
+            position.y = elevation < 0 ? elevation * HexMetrics.elevationStep : 0;
+            position.z = z * 15f;
+
+            // position cells
+            int prefabIndex = elevation <= 0 ? 1 : elevation;
+            //Debug.Log("Load prefab: " + prefabIndex);
+
+            HexCell cell = cells[i] = Instantiate(GetCellPrefab(prefabIndex));
+            cell.transform.SetParent(cellsTransform, false);
+            cell.transform.localPosition = position;
+            cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
+
+            // set material
+            cell.SetColor(HexMaterial.White);
+
+            // set grid
+            cell.grid = this;
+            cell.gridIndex = i;
+
+            // set elevation;
+            cell.Elevation = elevation;
+
+            // set neightbours
+            SetNeighbors(cell, x, z, i);
+
+            // set canvas
+            SetCanvas(cell);
+
+            return cell;
+        }
+
+        protected void InitializeNoise()
+        {
+            noises = new float[width * height];
+
+            float layerWeight = NoisePool.NoiseLayerInitialWeight(config.noiseLayers);
+
+            for (int layer = 1; layer <= config.noiseLayers; layer++)
+            {
+                float scale = config.noiseScale * layer * layer;
+                float weight = layerWeight * Mathf.Pow(.25f, layer - 1);
+
+                float[] layered;
+                float seed = pool.Next() * 1000;
+
+                switch (config.noiseType)
+                {
+                    case NoiseType.Perlin:
+                        layered = NoisePool.Perlin(width, height, scale, seed);
+                        break;
+                    case NoiseType.Simplex:
+                        layered = NoisePool.Simplex(width, height, scale, seed);
+                        break;
+                    case NoiseType.Cellular:
+                        layered = NoisePool.Cellular(width, height, scale, seed);
+                        break;
+                    default:
+                        layered = NoisePool.Perlin(width, height, scale, seed);
+                        break;
+                }
+
+                for (int i = 0; i < noises.Length; i++)
+                {
+                    noises[i] += layered[i] * weight;
+                }
+            }
+        }
+
+        private void SetNeighbors(HexCell cell, int x, int z, int i)
+        {
+            if (x > 0)
+            {
+                cell.SetNeighbor(HexDirection.W, cells[i - 1]);
+            }
+            if (z > 0)
+            {
+                if ((z & 1) == 0)
+                {
+                    cell.SetNeighbor(HexDirection.SE, cells[i - width]);
+                    if (x > 0)
+                    {
+                        cell.SetNeighbor(HexDirection.SW, cells[i - width - 1]);
+                    }
+                }
+                else
+                {
+                    cell.SetNeighbor(HexDirection.SW, cells[i - width]);
+                    if (x < width - 1)
+                    {
+                        cell.SetNeighbor(HexDirection.SE, cells[i - width + 1]);
+                    }
+                }
+            }
+        }
+
+        private void SetCanvas(HexCell cell)
+        {
+            if (noText)
                 return;
 
-            GameObject grassPrefab = GetGrassPrefab();
-            if (grassPrefab == null)
+            Canvas canvas = Instantiate(gridCanvasPrefab);
+            canvas.transform.SetParent(cell.transform, false);
+
+            Text label = Instantiate(cellLabelPrefab);
+            label.rectTransform.SetParent(canvas.transform, false);
+            label.rectTransform.anchoredPosition = Vector2.zero;
+            label.text = cell.coordinates.ToStringOnSeparateLines();
+
+            cell.uiRect = label.rectTransform;
+        }
+
+        private void SetWaterSurface()
+        {
+            if (waterPrefab == null)
             {
-                Debug.LogWarning("Grass prefab not set, cannot instantiate grass.");
+                Debug.LogWarning("Water prefab not set, cannot instantiate water surface.");
                 return;
             }
-            float scale = 10 * rnd % 3 + 5;
+            if (watersTransform == null)
+            {
+                watersTransform = transform.GetChild(1).transform;
+            }
 
-            GameObject grass = Instantiate(grassPrefab);
-            grass.transform.SetParent(cell.transform, false);
-            grass.transform.localScale = new Vector3(scale, scale, scale);
+            Vector3 position = Center();
+            position.y = transform.position.y + 0.1f - 12.5f;
 
-            Vector3 position = cell.transform.position;
-            position.y = cell.Elevation * HexMetrics.elevationStep;
-            grass.transform.position = position;
+            GameObject water = Instantiate(waterPrefab);
+            water.transform.position = position;
+            water.transform.SetParent(watersTransform);
+
+            water.transform.localScale = new Vector3(width * 18.75f, 25, height * 16f);
+
+            waters = water.transform;
         }
+
+        private void SetGrass(HexCell cell)
+        {
+            if (!config.generateGrass)
+                return;
+
+            if (cell.material == HexMaterial.Green || cell.material == HexMaterial.Emerald)
+            {
+                float rnd = pool.Next();
+                if (rnd < 1 - config.grassDensity)
+                    return;
+
+                GameObject grassPrefab = GetGrassPrefab();
+                if (grassPrefab == null)
+                {
+                    Debug.LogWarning("Grass prefab not set, cannot instantiate grass.");
+                    return;
+                }
+                float scale = 10 * rnd % 3 + 5;
+
+                GameObject grass = Instantiate(grassPrefab);
+                grass.transform.SetParent(cell.transform, false);
+                grass.transform.localScale = new Vector3(scale, scale, scale);
+
+                Vector3 position = cell.transform.position;
+                position.y = cell.Elevation * HexMetrics.elevationStep;
+                grass.transform.position = position;
+            }
+        }
+
+        private void SetHexCellColor(HexCell cell)
+        {
+            float rnd = noises[cell.gridIndex];
+            int index = Mathf.Clamp((int)(rnd * 10 % 10), 0, 10);
+
+            //Debug.Log("material index: " + index);
+            cell.SetColor((HexMaterial)index);
+        }
+        #endregion
+
+
+
+        #region Save/Load
+
+        [Button("Save", ButtonSpacing.Before)]
+        public void Save()
+        {
+            Debug.Log("save file");
+        }
+
+        [Button("Load", ButtonSpacing.After)]
+        public void Load()
+        {
+            Debug.Log("load file");
+        }
+        #endregion
     }
-
-    private void SetHexCellColor(HexCell cell)
-    {
-        float rnd = noises[cell.gridIndex];
-        int index = Mathf.Clamp((int)(rnd * 10 % 10), 0, 10);
-
-        //Debug.Log("material index: " + index);
-        cell.SetColor((HexMaterial)index);
-    }
-    #endregion
-
-
-
-    #region Save/Load
-
-    [Button("Save", ButtonSpacing.Before)]
-    public void Save()
-    {
-        Debug.Log("save file");
-    }
-
-    [Button("Load", ButtonSpacing.After)]
-    public void Load()
-    {
-        Debug.Log("load file");
-    }
-    #endregion
 }

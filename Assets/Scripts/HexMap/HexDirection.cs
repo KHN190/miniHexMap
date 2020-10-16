@@ -1,22 +1,25 @@
-﻿public enum HexDirection
+﻿namespace MiniHexMap
 {
-    NE, E, SE, SW, W, NW
-}
-
-public static class HexDirectionExtensions
-{
-    public static HexDirection Opposite(this HexDirection direction)
+    public enum HexDirection
     {
-        return (int)direction < 3 ? (direction + 3) : (direction - 3);
+        NE, E, SE, SW, W, NW
     }
 
-    public static HexDirection Previous(this HexDirection direction)
+    public static class HexDirectionExtensions
     {
-        return direction == HexDirection.NE ? HexDirection.NW : (direction - 1);
-    }
+        public static HexDirection Opposite(this HexDirection direction)
+        {
+            return (int)direction < 3 ? (direction + 3) : (direction - 3);
+        }
 
-    public static HexDirection Next(this HexDirection direction)
-    {
-        return direction == HexDirection.NW ? HexDirection.NE : (direction + 1);
+        public static HexDirection Previous(this HexDirection direction)
+        {
+            return direction == HexDirection.NE ? HexDirection.NW : (direction - 1);
+        }
+
+        public static HexDirection Next(this HexDirection direction)
+        {
+            return direction == HexDirection.NW ? HexDirection.NE : (direction + 1);
+        }
     }
 }

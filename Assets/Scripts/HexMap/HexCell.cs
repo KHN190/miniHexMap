@@ -1,61 +1,64 @@
 ﻿using UnityEngine;
 using EasyButtons;
 
-public class HexCell : MonoBehaviour
+namespace MiniHexMap
 {
-    [Range(-2, 6)]
-    public int Elevation;
-
-    public HexCoordinates coordinates;
-    public HexMaterial material;
-
-    [HideInInspector, SerializeField]
-    HexCell[] neighbors = new HexCell[6];
-
-    internal RectTransform uiRect;
-    internal HexGridBase grid;
-    internal int gridIndex;
-
-    [Button]
-    public void Refresh()
+    public class HexCell : MonoBehaviour
     {
-        grid.Refresh(this);
-    }
+        [Range(-2, 6)]
+        public int Elevation;
 
-    public void SetColor(HexMaterial material)
-    {
-        this.material = material;
+        public HexCoordinates coordinates;
+        public HexMaterial material;
 
-        GetComponent<MeshRenderer>().material = material.GetMaterial();
-    }
+        [HideInInspector, SerializeField]
+        HexCell[] neighbors = new HexCell[6];
 
-    public void SetElevation(int elev)
-    {
-        Elevation = elev;
+        internal RectTransform uiRect;
+        internal HexGridBase grid;
+        internal int gridIndex;
 
-        if (uiRect)
+        [Button]
+        public void Refresh()
         {
-            Vector3 uiPosition = uiRect.localPosition;
-            uiPosition.z = Elevation * -HexMetrics.elevationStep;
-            uiRect.localPosition = uiPosition;
+            grid.Refresh(this);
         }
-    }
 
-    public HexCell GetNeighbor(HexDirection direction)
-    {
-        if (direction < HexDirection.NE || direction > HexDirection.NW)
-            return null;
-        return neighbors[(int)direction];
-    }
+        public void SetColor(HexMaterial material)
+        {
+            this.material = material;
 
-    public void SetNeighbor(HexDirection direction, HexCell cell)
-    {
-        neighbors[(int)direction] = cell;
-        cell.neighbors[(int)direction.Opposite()] = this;
-    }
+            GetComponent<MeshRenderer>().material = material.GetMaterial();
+        }
 
-    public override string ToString()
-    {
-        return name + ", " + coordinates.ToString();
+        public void SetElevation(int elev)
+        {
+            Elevation = elev;
+
+            if (uiRect)
+            {
+                Vector3 uiPosition = uiRect.localPosition;
+                uiPosition.z = Elevation * -HexMetrics.elevationStep;
+                uiRect.localPosition = uiPosition;
+            }
+        }
+
+        public HexCell GetNeighbor(HexDirection direction)
+        {
+            if (direction < HexDirection.NE || direction > HexDirection.NW)
+                return null;
+            return neighbors[(int)direction];
+        }
+
+        public void SetNeighbor(HexDirection direction, HexCell cell)
+        {
+            neighbors[(int)direction] = cell;
+            cell.neighbors[(int)direction.Opposite()] = this;
+        }
+
+        public override string ToString()
+        {
+            return name + ", " + coordinates.ToString();
+        }
     }
 }
