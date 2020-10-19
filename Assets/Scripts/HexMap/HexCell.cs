@@ -1,12 +1,15 @@
 ﻿using UnityEngine;
 using EasyButtons;
+using System.Collections.Generic;
+using System;
 
 namespace MiniHexMap
 {
-    public class HexCell : MonoBehaviour
+    public class HexCell : MonoBehaviour, IEquatable<HexCell>
     {
         [Range(-2, 6)]
         public int Elevation;
+        public int MoveCost;
 
         public HexCoordinates coordinates;
         public HexMaterial material;
@@ -50,6 +53,21 @@ namespace MiniHexMap
             return neighbors[(int)direction];
         }
 
+        public HexCell[] GetAllNeighbors()
+        {
+            List<HexCell> cells = new List<HexCell>();
+
+            for (HexDirection direction = HexDirection.NE; direction < HexDirection.NW; direction++)
+            {
+                HexCell cell = GetNeighbor(direction);
+                if (cell != null)
+                {
+                    cells.Add(cell);
+                }
+            }
+            return cells.ToArray();
+        }
+
         public void SetNeighbor(HexDirection direction, HexCell cell)
         {
             neighbors[(int)direction] = cell;
@@ -59,6 +77,21 @@ namespace MiniHexMap
         public override string ToString()
         {
             return name + ", " + coordinates.ToString();
+        }
+
+        public bool Equals(HexCell other)
+        {
+            return gridIndex == other.gridIndex && grid == other.grid && Elevation == other.Elevation;
+        }
+
+        public override bool Equals(object other)
+        {
+            return base.Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 }

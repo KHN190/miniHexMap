@@ -13,8 +13,6 @@ namespace MiniHexMap
         [Range(1, 100)]
         public int height = 6;
 
-        public bool noText = true;
-
         [Header("Prefabs")]
         public Canvas gridCanvasPrefab;
 
@@ -111,16 +109,27 @@ namespace MiniHexMap
         {
             if (!cellPrefabCache.ContainsKey(elevation))
             {
-                HexCell prefab = Resources.Load<HexCell>("Prefabs/HexCell_" + elevation);
+                HexCell prefab = Resources.Load<HexCell>("Prefabs/Map/HexCell_" + elevation);
                 cellPrefabCache[elevation] = prefab;
             }
             return cellPrefabCache[elevation];
         }
 
+        protected GameObject GetWaterPrefab()
+        {
+            return Resources.Load<GameObject>("Prefabs/Map/Water");
+        }
+
         protected GameObject GetGrassPrefab()
         {
             int index = pool.Next() < .5f ? 0 : 1;
-            return Resources.Load<GameObject>("Prefabs/Grass_" + index);
+            return Resources.Load<GameObject>("Prefabs/Map/Grass_" + index);
+        }
+
+        protected GameObject GetTribePrefab(int indexMin = 0)
+        {
+            int index = Mathf.Max((int)(pool.Next() * 10) % 4, indexMin);
+            return Resources.Load<GameObject>("Prefabs/Tribe/Tribe_" + index);
         }
 
         public HexCell GetCell(HexCoordinates coordinates)

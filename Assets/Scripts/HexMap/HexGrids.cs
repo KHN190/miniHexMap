@@ -8,7 +8,6 @@ namespace MiniHexMap
     public class HexGrids : HexGridBase
     {
         public Text cellLabelPrefab;
-        public GameObject waterPrefab;
 
         private HexGenConfig config;
         private HexCell touchedCell;
@@ -17,6 +16,8 @@ namespace MiniHexMap
         private Transform cellsTransform;
         private Transform watersTransform;
         private Transform waters;
+
+        private int tribeCount;
 
         private void Awake()
         {
@@ -100,6 +101,8 @@ namespace MiniHexMap
                     i++;
                 }
             }
+            foreach (HexCell cell in cells)
+                SetTribe(cell);
             SetWaterSurface();
         }
 
@@ -107,6 +110,8 @@ namespace MiniHexMap
         public override void Clear()
         {
             base.Clear();
+
+            tribeCount = 0;
 
             if (waters != null)
             {
@@ -220,11 +225,16 @@ namespace MiniHexMap
 
         private void SetCanvas(HexCell cell)
         {
-            if (noText)
+            if (config.noText)
                 return;
 
-            Canvas canvas = Instantiate(gridCanvasPrefab);
-            canvas.transform.SetParent(cell.transform, false);
+            //Canvas canvas = Instantiate(gridCanvasPrefab);
+            //canvas.transform.SetParent(cell.transform, false);
+
+            GameObject canvas = SetPrefabAtTop(gridCanvasPrefab.gameObject, cell);
+            Vector3 pos = canvas.transform.position;
+            pos.y += .1f;
+            canvas.transform.position = pos;
 
             Text label = Instantiate(cellLabelPrefab);
             label.rectTransform.SetParent(canvas.transform, false);
@@ -236,6 +246,8 @@ namespace MiniHexMap
 
         private void SetWaterSurface()
         {
+            GameObject waterPrefab = GetWaterPrefab();
+
             if (waterPrefab == null)
             {
                 Debug.LogWarning("Water prefab not set, cannot instantiate water surface.");
@@ -258,6 +270,33 @@ namespace MiniHexMap
             waters = water.transform;
         }
 
+        private void SetTribe(HexCell cell)
+        {
+            if (!config.generateTribe)
+                return;
+
+            if (Vector3.Distance(cell.transform.position, Center()) > config.tribeRadius)
+                return;
+
+            if (pool.Next() > .3f)
+                return;
+
+            if (cell.material == HexMaterial.Brown)
+            {
+                int indexBound = cell.Elevation >= 2 ? 0 : 2;
+
+                GameObject tribePrefab = GetTribePrefab(indexBound);
+                if (tribePrefab == null)
+                {
+                    Debug.LogWarning("Tribe prefab not set, cannot instantiate tribe.");
+                    return;
+                }
+                SetPrefabAtTop(tribePrefab, cell, 2.5f);
+
+                tribeCount++;
+            }
+        }
+
         private void SetGrass(HexCell cell)
         {
             if (!config.generateGrass)
@@ -277,14 +316,21 @@ namespace MiniHexMap
                 }
                 float scale = 10 * rnd % 3 + 5;
 
-                GameObject grass = Instantiate(grassPrefab);
-                grass.transform.SetParent(cell.transform, false);
-                grass.transform.localScale = new Vector3(scale, scale, scale);
-
-                Vector3 position = cell.transform.position;
-                position.y = cell.Elevation * HexMetrics.elevationStep;
-                grass.transform.position = position;
+                SetPrefabAtTop(grassPrefab, cell, scale);
             }
+        }
+
+        private GameObject SetPrefabAtTop(GameObject prefab, HexCell cell, float scale = 1f)
+        {
+            GameObject go = Instantiate(prefab);
+            go.transform.SetParent(cell.transform, false);
+            go.transform.localScale = new Vector3(scale, scale, scale);
+
+            Vector3 position = cell.transform.position;
+            position.y = Mathf.Max(cell.Elevation, 1) * HexMetrics.elevationStep;
+            go.transform.position = position;
+
+            return go;
         }
 
         private void SetHexCellColor(HexCell cell)

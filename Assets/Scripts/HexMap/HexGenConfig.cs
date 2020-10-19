@@ -10,9 +10,15 @@ namespace MiniHexMap
     public class HexGenConfig : MonoBehaviour
     {
         [Header("Proc Gen")]
+        public bool noText = true;
         public bool generateGrass = true;
+        public bool generateTribe = true;
         [Range(0, 1)]
         public float grassDensity = .7f;
+        [Range(0, 400)]
+        public int tribeRadius = 200;
+        [Range(0, 1)]
+        public float tribeDensity = .3f;
 
         [Header("Noise Settings")]
         public NoiseType noiseType = NoiseType.Perlin;
