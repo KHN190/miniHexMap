@@ -11,7 +11,7 @@ namespace MiniHexMap
         public bool generateEdge = true;
         public bool generateBottom = true;
 
-        [Range(0, 6)]
+        [Range(0, 10)]
         public int elevation;
 
         void Initialize()

@@ -136,6 +136,11 @@ namespace MiniHexMap
             return Resources.Load<GameObject>("Prefabs/Tribe/Field_" + index);
         }
 
+        protected GameObject GetWallPrefab()
+        {
+            return Resources.Load<GameObject>("Prefabs/Tribe/Wall");
+        }
+
         public HexCell GetCell(HexCoordinates coordinates)
         {
             int index = coordinates.X + coordinates.Z * width + coordinates.Z / 2;
@@ -160,6 +165,56 @@ namespace MiniHexMap
             center /= width * height;
 
             return new Vector3(center.x, transform.position.y, center.z);
+        }
+
+        protected GameObject SetPrefabAtTop(GameObject prefab, HexCell cell, float scale = 1f, bool rotate = true)
+        {
+            GameObject go = Instantiate(prefab);
+            go.transform.SetParent(cell.transform, false);
+            go.transform.localScale = new Vector3(scale, scale, scale);
+
+            Vector3 position = cell.transform.position;
+            position.y = Mathf.Max(cell.Elevation, 1) * HexMetrics.elevationStep;
+            go.transform.position = position;
+
+            if (rotate)
+                RandomRotate(go);
+
+            return go;
+        }
+
+        protected GameObject SetPrefabAtTopEdge(GameObject prefab, HexCell cell, float scale, HexDirection direction)
+        {
+            direction = direction.Next();
+
+            GameObject go = Instantiate(prefab);
+            Vector3 oldScale = go.transform.localScale;
+            go.transform.SetParent(cell.transform, false);
+            go.transform.localScale = oldScale * scale;
+
+            Vector3 position = cell.transform.position;
+            Vector3 offset = HexMetrics.edges[(int)direction] * .8f;
+            position += offset;
+
+            position.y = Mathf.Max(cell.Elevation, 1) * HexMetrics.elevationStep;
+            go.transform.position = position;
+            go.name += "_" + direction;
+
+            HexRotate(go, direction);
+
+            return go;
+        }
+
+        protected void RandomRotate(GameObject go)
+        {
+            HexDirection face = (HexDirection)(pool.Next() * 10 % 6);
+            HexRotate(go, face);
+        }
+
+        protected void HexRotate(GameObject go, HexDirection direction)
+        {
+            Vector3 rotation = new Vector3(0, ((int)direction + 1) % 6 * 60, 0);
+            go.transform.Rotate(rotation);
         }
         #endregion
 

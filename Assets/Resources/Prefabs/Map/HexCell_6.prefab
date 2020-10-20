@@ -94,6 +94,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Elevation: 0
+  MoveCost: 0
   coordinates:
     x: 0
     z: 0

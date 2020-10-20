@@ -93,6 +93,8 @@ namespace MiniHexMap
                 for (int x = 0; x < width; x++)
                 {
                     int elevation = (int)(noises[i] * 9) % 9 - 2;
+                    // force top create inpassable tile
+                    if (elevation >= 5) elevation += pool.Next() > .5 ? 1 : 2;
 
                     CreateCell(x, z, i, elevation);
                     SetHexCellColor(cells[i]);
@@ -107,9 +109,10 @@ namespace MiniHexMap
                 InitializeTribeNoise();
 
                 foreach (HexCell cell in cells)
-                {
                     SetTribe(cell);
-                }
+
+                foreach (HexCell cell in cells)
+                    SetWall(cell);
             }
 
             SetWaterSurface();
@@ -310,7 +313,7 @@ namespace MiniHexMap
             // tribes
             if (cell.material == HexMaterial.Brown || cell.material == HexMaterial.Black)
             {
-                int index = (int)(tribeNoise[cell.gridIndex] * 10 % 7);
+                int index = (int)(tribeNoise[cell.gridIndex] * 10 % 6.5);
 
                 GameObject tribePrefab = GetTribePrefab(index);
                 if (tribePrefab == null)
@@ -319,6 +322,8 @@ namespace MiniHexMap
                     return;
                 }
                 SetPrefabAtTop(tribePrefab, cell, 2.5f);
+
+                cell.hasTown |= index <= 1;
             }
 
             // fields
@@ -329,10 +334,36 @@ namespace MiniHexMap
                 GameObject fieldPrefab = GetFieldPrefab(index);
                 if (fieldPrefab == null)
                 {
-                    Debug.LogWarning("Field prefab not set, cannot instantiate tribe.");
+                    Debug.LogWarning("Field prefab not set, cannot instantiate field.");
                     return;
                 }
                 SetPrefabAtTop(fieldPrefab, cell, 2.5f, false);
+            }
+        }
+
+        private void SetWall(HexCell cell)
+        {
+            if (!config.generateTribe)
+                return;
+
+            if (!cell.hasTown)
+                return;
+
+            GameObject wallPrefab = GetWallPrefab();
+            if (wallPrefab == null)
+            {
+                Debug.LogWarning("Wall prefab not set, cannot instantiate wall.");
+                return;
+            }
+
+            for (HexDirection direction = HexDirection.NE; direction <= HexDirection.NW; direction++)
+            {
+                HexCell next = cell.GetNeighbor(direction);
+
+                if (next == null || (!next.hasTown && next.Elevation - cell.Elevation <= 1))
+                {
+                    SetPrefabAtTopEdge(wallPrefab, cell, 3f, direction);
+                }
             }
         }
 
@@ -344,8 +375,9 @@ namespace MiniHexMap
             if (cell.material == HexMaterial.Green || cell.material == HexMaterial.Emerald)
             {
                 float rnd = pool.Next();
-                if (rnd < 1 - config.grassDensity)
-                    return;
+
+                if (cell.Elevation <= 5 && rnd < 1 - config.grassDensity)
+                        return;
 
                 GameObject grassPrefab = GetGrassPrefab();
                 if (grassPrefab == null)
@@ -359,32 +391,13 @@ namespace MiniHexMap
             }
         }
 
-        private GameObject SetPrefabAtTop(GameObject prefab, HexCell cell, float scale = 1f, bool rotate = true)
-        {
-            GameObject go = Instantiate(prefab);
-            go.transform.SetParent(cell.transform, false);
-            go.transform.localScale = new Vector3(scale, scale, scale);
-
-            Vector3 position = cell.transform.position;
-            position.y = Mathf.Max(cell.Elevation, 1) * HexMetrics.elevationStep;
-            go.transform.position = position;
-
-            if (rotate)
-                RandomRotate(go);
-
-            return go;
-        }
-
-        private void RandomRotate(GameObject go)
-        {
-            Vector3 rotation = new Vector3(0, pool.Next() * 360, 0);
-            go.transform.Rotate(rotation);
-        }
-
         private void SetHexCellColor(HexCell cell)
         {
             float rnd = noises[cell.gridIndex];
             int index = Mathf.Clamp((int)(rnd * 10 % 10), 0, 10);
+
+            if (cell.Elevation >= 6)
+                index = pool.Next() < .7f ? 8 : 9;
 
             //Debug.Log("material index: " + index);
             cell.SetColor((HexMaterial)index);

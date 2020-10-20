@@ -7,7 +7,7 @@ namespace MiniHexMap
 {
     public class HexCell : MonoBehaviour, IEquatable<HexCell>
     {
-        [Range(-2, 6)]
+        [Range(-2, 7)]
         public int Elevation;
         public int MoveCost;
 
@@ -20,6 +20,7 @@ namespace MiniHexMap
         internal RectTransform uiRect;
         internal HexGridBase grid;
         internal int gridIndex;
+        internal bool hasTown;
 
         [Button]
         public void Refresh()
