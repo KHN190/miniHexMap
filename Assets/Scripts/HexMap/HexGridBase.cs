@@ -126,10 +126,14 @@ namespace MiniHexMap
             return Resources.Load<GameObject>("Prefabs/Map/Grass_" + index);
         }
 
-        protected GameObject GetTribePrefab(int indexMin = 0)
+        protected GameObject GetTribePrefab(int index = 0)
         {
-            int index = Mathf.Max((int)(pool.Next() * 10) % 4, indexMin);
             return Resources.Load<GameObject>("Prefabs/Tribe/Tribe_" + index);
+        }
+
+        protected GameObject GetFieldPrefab(int index = 0)
+        {
+            return Resources.Load<GameObject>("Prefabs/Tribe/Field_" + index);
         }
 
         public HexCell GetCell(HexCoordinates coordinates)

@@ -17,7 +17,7 @@ namespace MiniHexMap
         private Transform watersTransform;
         private Transform waters;
 
-        private int tribeCount;
+        private float[] tribeNoise;
 
         private void Awake()
         {
@@ -101,8 +101,17 @@ namespace MiniHexMap
                     i++;
                 }
             }
-            foreach (HexCell cell in cells)
-                SetTribe(cell);
+
+            if (config.generateTribe)
+            {
+                InitializeTribeNoise();
+
+                foreach (HexCell cell in cells)
+                {
+                    SetTribe(cell);
+                }
+            }
+
             SetWaterSurface();
         }
 
@@ -111,7 +120,7 @@ namespace MiniHexMap
         {
             base.Clear();
 
-            tribeCount = 0;
+            tribeNoise = null;
 
             if (waters != null)
             {
@@ -196,6 +205,29 @@ namespace MiniHexMap
             }
         }
 
+        protected void InitializeTribeNoise()
+        {
+            float layerWeight = NoisePool.NoiseLayerInitialWeight(config.noiseLayers);
+
+            tribeNoise = new float[width * height];
+
+            for (int layer = 1; layer <= config.noiseLayers; layer++)
+            {
+                float scale = config.noiseScale * layer * layer;
+                float weight = layerWeight * Mathf.Pow(.25f, layer - 1);
+
+                float[] layered;
+                float seed = pool.Next() * 1000;
+
+                layered = NoisePool.Cellular(width, height, scale, seed);
+
+                for (int i = 0; i < noises.Length; i++)
+                {
+                    tribeNoise[i] += layered[i] * weight;
+                }
+            }
+        }
+
         private void SetNeighbors(HexCell cell, int x, int z, int i)
         {
             if (x > 0)
@@ -227,9 +259,6 @@ namespace MiniHexMap
         {
             if (config.noText)
                 return;
-
-            //Canvas canvas = Instantiate(gridCanvasPrefab);
-            //canvas.transform.SetParent(cell.transform, false);
 
             GameObject canvas = SetPrefabAtTop(gridCanvasPrefab.gameObject, cell);
             Vector3 pos = canvas.transform.position;
@@ -278,22 +307,32 @@ namespace MiniHexMap
             if (Vector3.Distance(cell.transform.position, Center()) > config.tribeRadius)
                 return;
 
-            if (pool.Next() > .3f)
-                return;
-
-            if (cell.material == HexMaterial.Brown)
+            // tribes
+            if (cell.material == HexMaterial.Brown || cell.material == HexMaterial.Black)
             {
-                int indexBound = cell.Elevation >= 2 ? 0 : 2;
+                int index = (int)(tribeNoise[cell.gridIndex] * 10 % 7);
 
-                GameObject tribePrefab = GetTribePrefab(indexBound);
+                GameObject tribePrefab = GetTribePrefab(index);
                 if (tribePrefab == null)
                 {
                     Debug.LogWarning("Tribe prefab not set, cannot instantiate tribe.");
                     return;
                 }
                 SetPrefabAtTop(tribePrefab, cell, 2.5f);
+            }
 
-                tribeCount++;
+            // fields
+            if (cell.material == HexMaterial.Yellow || cell.material == HexMaterial.Brown)
+            {
+                int index = (int)(tribeNoise[cell.gridIndex] * 10 % 6);
+
+                GameObject fieldPrefab = GetFieldPrefab(index);
+                if (fieldPrefab == null)
+                {
+                    Debug.LogWarning("Field prefab not set, cannot instantiate tribe.");
+                    return;
+                }
+                SetPrefabAtTop(fieldPrefab, cell, 2.5f, false);
             }
         }
 
@@ -320,7 +359,7 @@ namespace MiniHexMap
             }
         }
 
-        private GameObject SetPrefabAtTop(GameObject prefab, HexCell cell, float scale = 1f)
+        private GameObject SetPrefabAtTop(GameObject prefab, HexCell cell, float scale = 1f, bool rotate = true)
         {
             GameObject go = Instantiate(prefab);
             go.transform.SetParent(cell.transform, false);
@@ -330,7 +369,16 @@ namespace MiniHexMap
             position.y = Mathf.Max(cell.Elevation, 1) * HexMetrics.elevationStep;
             go.transform.position = position;
 
+            if (rotate)
+                RandomRotate(go);
+
             return go;
+        }
+
+        private void RandomRotate(GameObject go)
+        {
+            Vector3 rotation = new Vector3(0, pool.Next() * 360, 0);
+            go.transform.Rotate(rotation);
         }
 
         private void SetHexCellColor(HexCell cell)
