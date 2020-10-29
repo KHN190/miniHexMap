@@ -58,7 +58,7 @@ namespace MiniHexMap
         {
             List<HexCell> cells = new List<HexCell>();
 
-            for (HexDirection direction = HexDirection.NE; direction < HexDirection.NW; direction++)
+            for (HexDirection direction = HexDirection.NE; direction <= HexDirection.NW; direction++)
             {
                 HexCell cell = GetNeighbor(direction);
                 if (cell != null)
